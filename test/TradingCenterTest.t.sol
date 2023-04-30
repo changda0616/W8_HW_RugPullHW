@@ -109,12 +109,17 @@ contract TradingCenterTest is Test {
     }
 }
 
+// Running 2 tests for test/TradingCenterTest.t.sol:TradingCenterTest
+// [PASS] testRugPull() (gas: 436540)
+// [PASS] testUpgrade() (gas: 389119)
+// Test result: ok. 2 passed; 0 failed; finished in 2.11ms
+
 // | src/TradingCenterV2.sol:TradingCenterV2 contract |                 |       |        |       |         |
 // |--------------------------------------------------|-----------------|-------|--------|-------|---------|
 // | Deployment Cost                                  | Deployment Size |       |        |       |         |
 // | 324562                                           | 1653            |       |        |       |         |
 // | Function Name                                    | min             | avg   | median | max   | # calls |
 // | initialized                                      | 2299            | 2299  | 2299   | 2299  | 1       |
-// | rug                                              | 19035           | 24675 | 24675  | 30315 | 2       |
+// | rug                                              | 19035           | 26475 | 26475  | 33915 | 2       |
 // | usdc                                             | 2403            | 2403  | 2403   | 2403  | 1       |
 // | usdt                                             | 392             | 392   | 392    | 392   | 1       |

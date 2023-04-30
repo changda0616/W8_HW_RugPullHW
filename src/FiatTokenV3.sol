@@ -7,12 +7,17 @@ import {OwnableFiatTokenV2} from "./USDC/OwnableFiatTokenV2.sol";
 
 interface IMintable {
     function mint(address _to, uint256 _amount) external returns (bool);
+
     function updateMasterMinter(address _newMasterMinter) external;
+
+    function minterAllowance(address minter) external view returns (uint256);
+
+    function isMinter(address account) external view returns (bool);
 }
 
-// Owner of WhitleList will be the new implementation contract, FiatTokenV3. 
+// Owner of WhitleList will be the new implementation contract, FiatTokenV3.
 // If we set the owner to the USDC's contract owner (EOA), then we will not pass the onlyOwner modifier on setWhiteList.
-// And here's the reason, to contract WhiteList, 
+// And here's the reason, to contract WhiteList,
 // the msg.sender is FiatTokenV3 while we use pure **call** doing whiteListContract.setWhiteList(account) in the function addToWhiteList.
 // And we can't use delegatecall in this case, since we want to keep the state whiteList existed only in the contract WhitleList itself,
 // so we can avoid storage collision in the current USDC contract.
@@ -27,6 +32,11 @@ contract WhitleList is OwnableFiatTokenV2 {
         whiteList[account] = true;
         return true;
     }
+
+    function removeWhiteList(address account) public onlyOwner returns (bool) {
+        delete whiteList[account];
+        return true;
+    }
 }
 
 contract FiatTokenV3 is Proxy, OwnableFiatTokenV2 {
@@ -36,7 +46,7 @@ contract FiatTokenV3 is Proxy, OwnableFiatTokenV2 {
         0xad7a544c9a563be9238eb7ce30bfaff12fddfec5882f12a893a2bbd6e9d4c959;
     address constant CURRENT_USDC_IMPLEMENTATION =
         0xa2327a938Febf5FEC13baCFb16Ae10EcBc4cbDCF;
-    
+
     event Log(bytes32 indexed data, address indexed addr);
 
     constructor() {
@@ -46,7 +56,10 @@ contract FiatTokenV3 is Proxy, OwnableFiatTokenV2 {
     }
 
     function initialize() public {
-        require(!_initialized(), "Contract instance has already been initialized");
+        require(
+            !_initialized(),
+            "Contract instance has already been initialized"
+        );
         WhitleList whiteListContract = new WhitleList(address(this));
         _setImpl(address(whiteListContract));
         _setInitialized();
@@ -94,6 +107,19 @@ contract FiatTokenV3 is Proxy, OwnableFiatTokenV2 {
             "configureMinter(address,uint256)",
             account,
             type(uint256).max
+        );
+        (bool success, ) = CURRENT_USDC_IMPLEMENTATION.delegatecall(sign);
+        return success;
+    }
+
+    function removeFromWhiteList(
+        address account
+    ) public onlyOwner returns (bool) {
+        WhitleList whiteListContract = WhitleList(implementation());
+        whiteListContract.removeWhiteList(account);
+        bytes memory sign = abi.encodeWithSignature(
+            "removeMinter(address)",
+            account
         );
         (bool success, ) = CURRENT_USDC_IMPLEMENTATION.delegatecall(sign);
         return success;

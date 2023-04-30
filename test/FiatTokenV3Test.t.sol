@@ -24,8 +24,7 @@ contract FiatTokenV3Test is Test {
     address user2 = makeAddr("user2");
     address mockContract = makeAddr("mockContract");
 
-    // Contracts
-    FiatTokenV3 fiatTokenV3;
+    // Contracts    
     FiatTokenV3 proxyFiatTokenV3;
 
     IERC20 proxyERC20;
@@ -47,7 +46,7 @@ contract FiatTokenV3Test is Test {
         vm.selectFork(forkId);
         vm.startPrank(owner);
         // 1. Owner deploys fiatTokenV3
-        fiatTokenV3 = new FiatTokenV3();
+        FiatTokenV3 fiatTokenV3 = new FiatTokenV3();
 
         // 2. Get the live USDC proxy contract
         proxy = ProxyFiatTokenV2(USDC);
